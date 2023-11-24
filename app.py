@@ -36,21 +36,23 @@ class DragImg():
             # Update the background image with the new position
             self.background = cvzone.overlayPNG(background, self.img, self.posOrigin)
 
-path = "ImagesPNG"
-myList = os.listdir(path)
+path = "Images"
+pathImg = os.path.join(path, '1.png')
 
 listImg = []
-for x, pathImg in enumerate(myList):
+n = 4
+
+for x in range(n):
     if 'png' in pathImg:
         imgType = 'png'
     else:
         imgType = 'jpg'
-    listImg.append(DragImg(f'{path}/{pathImg}', [50 + x * 300, 50], imgType))
+    listImg.append(DragImg(f'{pathImg}', [50 + x * 300, 50], imgType))
 
 while True:
     success, img = cap.read()
     img = cv2.flip(img, 1)
-    background = cv2.imread('christmas-tree.jpg')
+    background = cv2.imread('Christmas-tree.png')
     hands, img = detector.findHands(img, flipType=False)
 
     if hands:
