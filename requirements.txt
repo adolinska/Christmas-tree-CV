@@ -1,2 +1,3 @@
 cvzone
 cv2
+mediapipe

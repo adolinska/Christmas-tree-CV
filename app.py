@@ -23,18 +23,25 @@ class DragImg():
         else:
             self.img = cv2.imread(self.path)
 
-        self.img = cv2.resize(self.img, (0,0),None,0.4,0.4)   
+        self.img = cv2.resize(self.img, (0, 0), None, 0.2, 0.2)
         self.size = self.img.shape[:2]
 
-    def update(self, cursor):
-        ox, oy = self.posOrigin
+    def update(self, cursor, otherObjects):
+        ox, oy = cursor[0] - self.size[1] // 2, cursor[1] - self.size[0] // 2
         h, w = self.size
 
-        # Check if in region
-        if ox < cursor[0] < ox + w and oy < cursor[1] < oy + h:
-            self.posOrigin = cursor[0] - w // 2, cursor[1] - h // 2
-            # Update the background image with the new position
-            self.background = cvzone.overlayPNG(background, self.img, self.posOrigin)
+        # Check if the new position is valid (no collision with other objects)
+        valid_position = all(
+            not (ox < obj.posOrigin[0] + obj.size[1] and
+                 ox + w > obj.posOrigin[0] and
+                 oy < obj.posOrigin[1] + obj.size[0] and
+                 oy + h > obj.posOrigin[1])
+            for obj in otherObjects if obj != self
+        )
+
+        if valid_position:
+            self.posOrigin = (ox, oy)
+
 
 path = "Images"
 pathImg = os.path.join(path, '1.png')
@@ -43,11 +50,7 @@ listImg = []
 n = 4
 
 for x in range(n):
-    if 'png' in pathImg:
-        imgType = 'png'
-    else:
-        imgType = 'jpg'
-    listImg.append(DragImg(f'{pathImg}', [50 + x * 300, 50], imgType))
+    listImg.append(DragImg(f'{pathImg}', [50 + x * 300, 100], imgType = 'png'))
 
 while True:
     success, img = cap.read()
@@ -61,10 +64,10 @@ while True:
         length, info, background = detector.findDistance((lmList[8][0], lmList[8][1]), 
                                        (lmList[12][0], lmList[12][1]), background)
 
-        if length < 60:
+        if length < 100:
             cursor = lmList[8]
             for imgObject in listImg:
-                imgObject.update(cursor)
+                imgObject.update(cursor, listImg)
 
     try:
 
